@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+echo "🚀 Running pre-push checks..."
+
+# Run test coverage to ensure all tests pass
+echo "📋 Running test coverage..."
+if ! npm run test:cov; then
+  echo "❌ Tests failed. Push aborted."
+  exit 1
+fi
+
+# Run ESLint with auto-fix
+echo "🔍 Running ESLint with auto-fix..."
+npm run lint
+
+# Check if ESLint made any changes
+if ! git diff --quiet; then
+  echo "❌ ESLint auto-fixed some files. Push aborted."
+  echo "💡 Please review the changes, add them with 'git add', commit, and push again."
+  git diff --name-only
+  exit 1
+fi
+
+# Run Prettier to check formatting
+echo "✨ Checking code formatting..."
+if ! npm run format:check; then
+  echo "❌ Code formatting issues found. Please run 'npm run format' and commit the changes."
+  exit 1
+fi
+
+echo "✅ All pre-push checks passed! Proceeding with push..."

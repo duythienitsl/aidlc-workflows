@@ -1,0 +1,16 @@
+version: 1
+# Greenfield: after the human picks backend | frontend | monorepo in the draft PRD, set bootstrap.shape.
+# Brownfield: set shape to brownfield when the app and codebase already exist (no greenfield scaffold).
+# Pipeline skills may use this hint when running execute-tasks for scaffolding or alignment.
+bootstrap:
+  shape: unset # unset | backend | frontend | monorepo | brownfield
+paths:
+  prds_dir: docs/greenfield-bootstrap
+  prd_file: docs/greenfield-bootstrap/prd-document.md
+  backlog_file: docs/greenfield-bootstrap/tasks/backlog.md
+  todo_file: docs/greenfield-bootstrap/tasks/todo.md
+domain:
+  tech_stack_file: .aidlc/tech-stack.md
+  architecture_file: .aidlc/architecture.md
+validation:
+  require_domain_context: false
