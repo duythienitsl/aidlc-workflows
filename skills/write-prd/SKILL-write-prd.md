@@ -1,11 +1,15 @@
 ---
 name: write-prd
-description: Create a PRD through user interview, codebase exploration, and module design, then write it as docs/<prd-slug>/prd-document.md. Use when user wants to write a PRD, create a product requirements document, or plan a new feature.
+description: Create a PRD through user interview, codebase exploration, and module design, then write it as docs/<prd-slug>/prd-document.md (English) and docs/<prd-slug>/prd-document-vi.md (Vietnamese). Use when user wants to write a PRD, create a product requirements document, or plan a new feature.
 ---
 
 # Write PRD (alternate brief)
 
-**PRD files live here:** each run uses **one new folder** `docs/<prd-slug>/` (short kebab-case slug, e.g. `login-and-welcome-ui`). The PRD file is always **`prd-document.md`** inside that folder. Task artifacts from `create-tasks` sit in **`docs/<prd-slug>/tasks/`** (`backlog.md`, `todo.md`). Create `docs/<prd-slug>/` if missing. Update `.aidlc/project.yaml` paths to the slug you are executing when using project context. Only use a different layout if the user explicitly asks for this session.
+**PRD files live here:** each run uses **one new folder** `docs/<prd-slug>/` (short kebab-case slug, e.g. `login-and-welcome-ui`). **Always produce two PRD files** inside that folder:
+- **`prd-document.md`** — English version
+- **`prd-document-vi.md`** — Vietnamese version
+
+Both files contain identical content translated into their respective language. Task artifacts from `create-tasks` sit in **`docs/<prd-slug>/tasks/`** (`backlog.md`, `todo.md`). Create `docs/<prd-slug>/` if missing. Update `.aidlc/project.yaml` paths to the slug you are executing when using project context (`prd_file` points at `prd-document.md`). Only use a different layout if the user explicitly asks for this session.
 
 ## Process (short)
 

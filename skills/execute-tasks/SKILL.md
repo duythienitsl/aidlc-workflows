@@ -26,7 +26,7 @@ Take the next task from the agreed backlog, implement it with tests, run the sui
 6. **Implement the minimum** to satisfy the task’s acceptance criteria — follow `incremental-implementation` / `frontend-ui-engineering` / `api-and-interface-design` when loaded; no scope creep into other tasks.
 7. **Verify** — Project test command (e.g. `npm test`), lint/build if applicable, quick manual check where needed.
 8. **Commit** — Follow `skills/playbooks/git-workflow-and-versioning/SKILL.md` when loaded; otherwise one commit per completed task (or one logical commit per task if the team prefers), message references task ID and PRD/initiative.
-9. **Update backlog** — Mark task complete in `<todo_file>` / `<backlog_file>`; note blockers with owner + next step.
+9. **Update backlog** — Mark task complete in `<todo_file>` / `<backlog_file>`; **tick each `- [ ]` acceptance criterion that has been met (`- [x]`), and leave any unmet criterion unchecked with the reason recorded in the task's Status note** (cite the gap, the cause, and the follow-up owner). Note blockers with owner + next step.
 
 If something fails, use `skills/playbooks/debugging-and-error-recovery/SKILL.md` when the work is diagnosis-heavy; then re-run the suite for regressions.
 

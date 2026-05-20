@@ -26,7 +26,11 @@ Capture the *what* and *why* in a structured PRD. No implementation detail until
 5. **Design modules** — Sketch the major modules to build or modify. Prefer **deep modules**: a lot of functionality behind a simple, stable interface that can be tested in isolation (vs shallow modules that expose complexity). Check that modules match the human’s expectations and which modules should have tests.
 6. **Surface assumptions** — List assumptions explicitly; ask the human to confirm or correct.
 7. **Write the PRD** — Use the template below (adapt if the project already has a standard).
-8. **Save** — Each `write-prd` run creates **one new folder** `docs/<prd-slug>/` (short kebab-case `prd-slug`, e.g. `login-and-welcome-ui`). Write the PRD to **`<prds_dir>/prd-document.md`** (resolved path: default `docs/<prd-slug>/prd-document.md`). Create `docs/<prd-slug>/` if needed. Task files from `create-tasks` live in **`docs/<prd-slug>/tasks/`**. After saving, update `.aidlc/project.yaml` so `paths.prds_dir`, `prd_file`, `backlog_file`, and `todo_file` point at this slug’s tree when the repo uses project context for execution. If there is no `.aidlc/project.yaml`, only use a different layout than `docs/<prd-slug>/prd-document.md` + `docs/<prd-slug>/tasks/` when the user explicitly asks for this session or the repo already standardizes another location (e.g. `docs/prd.md`, `PRD.md` at root).
+8. **Save** — Each `write-prd` run creates **one new folder** `docs/<prd-slug>/` (short kebab-case `prd-slug`, e.g. `login-and-welcome-ui`). Write **two PRD files** — always produce both:
+   - **`<prds_dir>/prd-document.md`** — English version (default `docs/<prd-slug>/prd-document.md`)
+   - **`<prds_dir>/prd-document-vi.md`** — Vietnamese version (default `docs/<prd-slug>/prd-document-vi.md`)
+
+   Both files use the same template and carry identical content and decisions — section names, headings, and all prose are translated into the respective language. Create `docs/<prd-slug>/` if needed. Task files from `create-tasks` live in **`docs/<prd-slug>/tasks/`**. After saving, update `.aidlc/project.yaml` so `paths.prds_dir`, `prd_file`, `backlog_file`, and `todo_file` point at this slug’s tree when the repo uses project context for execution (`prd_file` points at the English file `prd-document.md`; downstream skills read this file). If there is no `.aidlc/project.yaml`, only use a different layout than `docs/<prd-slug>/prd-document.md` + `docs/<prd-slug>/tasks/` when the user explicitly asks for this session or the repo already standardizes another location (e.g. `docs/prd.md`, `PRD.md` at root).
 9. **Gate** — Stop and get human confirmation before `create-tasks` or any code. Do not create or update GitHub issues for PRDs as part of this skill.
 
 ## PRD Template
@@ -100,7 +104,8 @@ Anything else that helps execution (optional).
 
 ## Verification
 
-- [ ] PRD file exists at the resolved `prd_file` (default `<prds_dir>/prd-document.md`) or agreed path and is readable in-repo.
+- [ ] Both PRD files exist and are readable in-repo: `prd-document.md` (English) and `prd-document-vi.md` (Vietnamese) at the resolved `prds_dir`.
+- [ ] Both files carry the same content — no section, decision, or criterion is missing from either version.
 - [ ] Acceptance criteria are observable and numbered; user stories and AC are distinct.
 - [ ] No implementation tickets or code mixed into the PRD at the wrong level — product/requirements and agreed technical *decisions*, not a patch list.
 - [ ] Human has explicitly approved proceeding to task creation.
