@@ -23,6 +23,7 @@ Map user intent to skills so the right process runs:
 | User intent                                                                                                                                 | Skill                     |
 | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
 | First-time AIDLC setup in an app repo; centralize PRD/task paths, domain rules; optional greenfield PRD (backend / frontend / monorepo) or **brownfield** (existing codebase, inventory into `.aidlc/`) | `init-aidlc-project`      |
+| Production issue / unexpected behaviour, cause unknown; diagnose from symptom to root cause (read-only) before deciding on a fix             | `investigate`             |
 | New initiative, feature, or unclear requirements; need a PRD                                                                                | `write-prd`               |
 | PRD exists; break work into ordered tasks with acceptance criteria                                                                          | `create-tasks`            |
 | Backlog exists; implement the next task with tests and commits                                                                              | `execute-tasks`           |
@@ -68,6 +69,7 @@ Rough alignment with generic phases:
 | Phase                                    | Skill                |
 | ---------------------------------------- | -------------------- |
 | Optional: project paths and domain rules | `init-aidlc-project` |
+| Optional entry: diagnose a prod issue (read-only) | `investigate` |
 | Define scope and success                 | `write-prd`          |
 | Plan work                                | `create-tasks`       |
 | Build                                    | `execute-tasks`      |

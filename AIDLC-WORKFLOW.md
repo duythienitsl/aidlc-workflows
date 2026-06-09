@@ -7,8 +7,10 @@ This document summarizes the **AIDLC** pipeline from [AGENTS.md](./AGENTS.md): p
 Canonical order:
 
 ```text
-[init-aidlc-project] → write-prd → create-tasks → execute-tasks → test → review → deploy
+[init-aidlc-project] → [investigate] → write-prd → create-tasks → execute-tasks → test → review → deploy
 ```
+
+`investigate` is an **optional Stage 0** entry point for production support: it diagnoses a symptom to a confirmed root cause (read-only) and, when a fix needs planning, hands its `investigation.md` to `write-prd` in the same `docs/<issue-slug>/` folder. Trivial fixes skip straight to `execute-tasks`; external-only fixes (a HubSpot workflow or Make scenario) leave the repo entirely.
 
 ```mermaid
 flowchart TB
@@ -61,6 +63,7 @@ Stages run in order (solid arrows). Dashed links highlight where people typicall
 | Stage | Skill | What it does | Where humans stay involved |
 | ----- | ----- | ------------ | --------------------------- |
 | Optional | `init-aidlc-project` | Scaffold `.aidlc/`, paths, stack/architecture notes; optional greenfield PRD draft | Choosing shape, paths, and what goes into domain files |
+| Optional (Stage 0) | `investigate` | Diagnose a prod issue from symptom to root cause across LH-v1's systems, **read-only**; write `docs/<issue-slug>/investigation.md` | Provide symptom + IDs; confirm root cause; choose handoff (direct fix vs `write-prd` vs external) |
 | 1 | `write-prd` | Capture problem, scope, success, modules, assumptions in a PRD | Interview, assumption checks, **gate: approve PRD** before task creation |
 | 2 | `create-tasks` | Turn approved PRD into ordered backlog with acceptance criteria | **Gate: review / adjust backlog** before execution |
 | 3 | `execute-tasks` | Implement tasks with tests and commits; use playbooks and domain skills as needed | Ordering work, resolving conflicts, approving deferred acceptance criteria |

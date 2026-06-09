@@ -7,12 +7,13 @@ Agent-oriented workflows for product definition, task breakdown, implementation,
 Work moves in order. Each step has a matching skill and command — complete and get human approval before moving on when the skill says to gate.
 
 ```text
-[init-aidlc-project]  →  write-prd  →  create-tasks  →  execute-tasks  →  test  →  review  →  deploy
+[init-aidlc-project]  →  [investigate]  →  write-prd  →  create-tasks  →  execute-tasks  →  test  →  review  →  deploy
 ```
 
 | Step | Purpose | Skill | Command (Claude Code) |
 |------|---------|--------|------------------------|
 | 0 (optional) | Scaffold `.aidlc/` with paths, tech stack, architecture templates, and optional **draft greenfield PRD** (backend / frontend / monorepo) | `skills/init-aidlc-project/` | `/init-aidlc-project` |
+| 0 (optional) | Diagnose a production issue from symptom to root cause (read-only); write `investigation.md` that feeds `write-prd` or a direct fix | `skills/investigate/` | `/investigate` |
 | 1 | Capture problem, scope, and success in a PRD | `skills/write-prd/` | `/write-prd` |
 | 2 | Break the PRD into ordered tasks with acceptance criteria | `skills/create-tasks/` | `/create-tasks` |
 | 3 | Implement tasks incrementally with tests and commits | `skills/execute-tasks/` | `/execute-tasks` |
