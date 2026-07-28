@@ -16,7 +16,7 @@ The skill **never merges** an MR. Review stays a human gate.
 ## When to Use
 
 - Production is broken (or actively harmful) and the fix cannot wait for the next sprint release
-- A patch already merged to `main` needs to be carried back into `dev` / `develop`
+- A patch that already reached `main` was never carried back into `dev` / `develop`. Run **step 9 only**: cut `sync/release.<the version that shipped it>` from the working branch and cherry-pick the fix SHAs off `main`. Skip steps 3-8 — the branch, the version, and MR #1 already exist.
 
 **When not to use:**
 
