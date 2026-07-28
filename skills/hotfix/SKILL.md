@@ -264,3 +264,32 @@ git -C <repo> push -u origin sync/release.<new> \
 Target `dev` for api-platform, `develop` for platform. The same five description items from step 8 apply, and the description states that this MR carries the hotfix logic **without** the version bump.
 
 **End state for an app repo: exactly two MRs** — `release/<new> → main` and `sync/release.<new> → dev|develop`. Neither is merged by this skill.
+
+---
+
+## Infrastructure variant
+
+`infrastructure/` is a Terraform repo. It has **no `dev` branch** and **no `package.json`**, so two parts of the flow above simply do not exist for it.
+
+| Step | Infrastructure |
+|------|----------------|
+| 1 Resolve repo | Same — ask if unclear. |
+| 2 Preflight | Same, minus the working-branch check (there is none). |
+| 3 Resolve version | **Skipped.** No version file, nothing to derive. |
+| 4 Cut branch | `git -C infrastructure checkout -B hotfix/LHP-XXXX origin/main` |
+| 5 Apply fix | Same. Keep it minimal. |
+| 6 Gates | `terraform fmt -check` and `terraform validate` instead of tsc/eslint/jest/build. |
+| 7 Version bump | **Skipped.** |
+| 8 MR #1 | Same push options, `merge_request.target=main`. |
+| 9 Sync + MR #2 | **Skipped.** There is no working branch to sync into. |
+
+If the ticket id is unknown, ask for one rather than inventing a branch name — the branch name is the only place the ticket is recorded here.
+
+The MR description carries the same five items as step 8, plus:
+
+- **Which stacks are affected** (`stacks/api-platform`, `stacks/depreciation-archive`, or a shared module).
+- A note that **`apply` is a manual gate** in CI: the pipeline runs `fmt` + `validate` + `plan` on the MR, and the per-stack `apply` job on `main` is `when: manual`. Merging the MR does **not** change infrastructure by itself — a human still has to run the apply job.
+
+**Never run `terraform apply` from this skill.** The CI gate exists precisely so a human presses that button.
+
+**End state for infrastructure: exactly one MR** — `hotfix/LHP-XXXX → main`, unmerged.
