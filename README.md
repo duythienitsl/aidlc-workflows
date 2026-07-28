@@ -20,6 +20,9 @@ Work moves in order. Each step has a matching skill and command — complete and
 | 4 | Run and harden automated verification | `skills/test/` | `/test` |
 | 5 | Review the diff for quality and risk | `skills/review/` | `/review` |
 | 6 | Pre-launch checklist, rollout, monitoring, and rollback before production | `skills/deploy/` | `/deploy` |
+| out-of-band | Patch a live production defect between releases: branch off `main`, verify, open the MR into `main`, then sync the same fix back into `dev`/`develop` | `skills/hotfix/` | `/hotfix` |
+
+`hotfix` is **not** a pipeline stage. It runs parallel to `deploy` when production breaks and the fix cannot wait for the next sprint release, and it never replaces `write-prd` / `create-tasks` for planned work.
 
 ### Default artifacts
 

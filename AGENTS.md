@@ -30,6 +30,7 @@ Map user intent to skills so the right process runs:
 | Strengthen or run automated checks after changes                                                                                            | `test`                    |
 | Quality / risk review of a diff or branch                                                                                                   | `review`                  |
 | Production release: pre-launch checklist, staged rollout, monitoring, rollback                                                              | `deploy`                  |
+| **Out-of-band:** production is broken and the fix cannot wait for the next sprint release; patch `main` and sync the same fix back into `dev`/`develop` | `hotfix`                  |
 | Project-specific SDK, auth, or platform pattern (add your own domain skill under `skills/<name>/`)                                          | `skills/<name>/SKILL.md`  |
 
 
@@ -76,6 +77,9 @@ Rough alignment with generic phases:
 | Verify                                   | `test`               |
 | Review                                   | `review`             |
 | Ship / production readiness            | `deploy`             |
+| Out-of-band: patch a live production defect | `hotfix`        |
+
+`hotfix` sits **outside** the sequential pipeline. It runs parallel to `deploy` whenever production breaks between releases, and does not replace any pipeline step.
 
 
 ### Claude Code vs OpenCode
