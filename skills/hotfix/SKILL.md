@@ -217,3 +217,50 @@ Every hotfix MR description must carry all five:
 5. **Link to the sibling MR** — the sync MR from step 9. Open MR #1 first, then edit in the link, or state that MR #2 follows.
 
 **Do not merge the MR.** Leave it open for review.
+
+---
+
+## Step 9 — Sync the fix back and open MR #2 (into `dev` / `develop`)
+
+Skip this entirely for `infrastructure`.
+
+Without this step the fix lives only on `main`, and the next sprint release — cut from `dev` / `develop` — overwrites it and the bug returns. This is the step people forget, so it is not optional.
+
+```bash
+git -C <repo> checkout -B sync/release.<new> origin/dev        # api-platform
+git -C <repo> checkout -B sync/release.<new> origin/develop    # platform
+git -C <repo> cherry-pick <fix SHA> [<fix SHA> …]              # from step 5, in order
+```
+
+Note the branch name uses a **dot**: `sync/release.1.94.6`, not `sync/release/1.94.6`.
+
+**Cherry-pick only the fix SHAs recorded in step 5. Never include the `chore(release)` bump commit** — see step 7 for why.
+
+Do not merge the hotfix branch into the sync branch as a shortcut. A merge brings the bump with it.
+
+### Two exception paths — both stop rather than improvise
+
+**Conflict.** The working branch has moved on and the patch does not apply cleanly:
+
+- **STOP.** Run `git -C <repo> status` and list the conflicted files for the human.
+- Leave the working tree exactly as it is. Never auto-resolve — you cannot tell which side of a conflict reflects intended newer work on `dev`.
+- MR #1 stays open and untouched. Say clearly in the report that **MR #2 is outstanding** and what is blocking it.
+
+**Empty cherry-pick.** Git reports the change is already present (common when the fix was developed on `dev` first and cherry-picked forward into the hotfix):
+
+- Report it: the working branch already carries this fix.
+- **Ask** whether to skip MR #2 rather than opening an empty MR. Default to skipping.
+
+### Push and open MR #2
+
+```bash
+git -C <repo> push -u origin sync/release.<new> \
+  -o merge_request.create \
+  -o merge_request.target=dev \
+  -o merge_request.title="sync(<new>): <short summary> -> dev" \
+  -o merge_request.description="<same five required items, plus a link to MR #1>"
+```
+
+Target `dev` for api-platform, `develop` for platform. The same five description items from step 8 apply, and the description states that this MR carries the hotfix logic **without** the version bump.
+
+**End state for an app repo: exactly two MRs** — `release/<new> → main` and `sync/release.<new> → dev|develop`. Neither is merged by this skill.
