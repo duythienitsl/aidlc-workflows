@@ -64,3 +64,56 @@ Parse it for:
 Nothing in this step touches git. No fetch, no checkout, no branch — the repo question comes first.
 
 State back to the human, before continuing: the resolved repo(s), the ticket id (or that there is none), and your one-line understanding of the fix. Then process each selected repo **in turn**, independently.
+
+---
+
+## Step 2 — Preflight (per repo)
+
+Run these and abort with a clear message if any fail:
+
+1. **Working tree is clean** — `git -C <repo> status --porcelain` is empty. If it is dirty, stop and show the human. Never stash or discard their work.
+2. **Fetch** — `git -C <repo> fetch origin --prune`.
+3. **`origin/main` exists.** For app repos also confirm `origin/dev` (api-platform) or `origin/develop` (platform) exists, since step 9 needs it.
+
+If a sprint release MR into `main` is currently open, **warn** the human (the version you are about to claim may collide with it) but do not block — they decide.
+
+---
+
+## Step 3 — Resolve the hotfix version (app repos only)
+
+Skip this entirely for `infrastructure`.
+
+Read **two** sources and reconcile them:
+
+- **Source A — what is deployed:**
+  ```bash
+  git -C <repo> show origin/main:package.json      # read the "version" field
+  ```
+- **Source B — the highest release branch on the remote:**
+  ```bash
+  git -C <repo> branch -r | grep -oE 'release/[0-9]+\.[0-9]+\.[0-9]+'
+  ```
+  Compare **numerically, segment by segment** — never as strings, or `1.94.10` sorts below `1.94.9`.
+
+Then:
+
+| Case | What to do |
+|------|------------|
+| A and B agree | Use it as the baseline and continue. |
+| A and B disagree | **STOP.** Show both values, say which is which, and ask the human which baseline to use. Do not auto-pick — a mismatch usually means someone forgot a bump, and guessing wrong ships the wrong version number. |
+
+The **new version increments the last segment by one**. Worked example: `origin/main` is on `1.94.5` and the highest remote branch is `release/1.94.5`, so the hotfix is **`release/1.94.6`**.
+
+If `origin/release/<new>` already exists on the remote, warn the human and ask whether to (a) update the existing branch, or (b) pick a different version. Wait for their answer.
+
+State the resolved version and branch name back before continuing.
+
+---
+
+## Step 4 — Cut the hotfix branch
+
+```bash
+git -C <repo> checkout -B release/<new> origin/main
+```
+
+Always from **`origin/main`**. The local `main` in both app repos is stale and cutting from it silently ships old code to production. Same rule for `infrastructure` (see the variant below), which uses `hotfix/LHP-XXXX` instead.
