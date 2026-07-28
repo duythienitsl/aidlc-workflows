@@ -117,3 +117,72 @@ git -C <repo> checkout -B release/<new> origin/main
 ```
 
 Always from **`origin/main`**. The local `main` in both app repos is stale and cutting from it silently ships old code to production. Same rule for `infrastructure` (see the variant below), which uses `hotfix/LHP-XXXX` instead.
+
+---
+
+## Step 5 — Apply the fix and record its SHA
+
+Apply the patch by whichever route fits:
+
+- **Write it here** when the cause is already understood (from `/investigate`, from the human's description, or from your own reading of the code). Keep it minimal — a hotfix is the smallest change that stops the bleeding, not a refactor.
+- **Cherry-pick it** when the fix already exists as a commit on a feature branch or on `dev`: `git -C <repo> cherry-pick <sha>`.
+
+Stage deliberately — explicit paths, not `git add -A`, so nothing unrelated is swept in. Then commit:
+
+```bash
+git -C <repo> commit -m "fix(LHP-XXXX): <what the patch does>"
+```
+
+**Record the resulting SHA immediately** (`git -C <repo> rev-parse HEAD`). If the fix took several commits, record all of them, in order. That list is the **only** input to the cherry-pick in step 9 — losing it means redoing the sync by hand.
+
+No `Co-Authored-By` trailer.
+
+---
+
+## Step 6 — Gates (before anything is pushed)
+
+This code goes straight to production, so it is verified at least as strictly as an ordinary feature MR. Run all four, from inside the repo:
+
+```bash
+npx tsc --noEmit
+./node_modules/.bin/eslint <the files you touched>
+npx jest <the suites covering your change>
+npm run build                       # production build
+```
+
+- **Always use `./node_modules/.bin/eslint`.** A global ESLint 9 shadows the repo's local ESLint 8; a bare `eslint` or `npx eslint` lints against the wrong config.
+- **Production build is not optional here.** A type-clean change can still fail a Next.js or Nest build, and there is no staging step between this branch and production.
+
+### Separating pre-existing failures
+
+Not every red result is yours. Confirm ownership before acting:
+
+```bash
+git -C <repo> stash -u
+# re-run the failing check on the clean base
+git -C <repo> stash pop
+```
+
+If it fails on the clean base too, it is **pre-existing**: report it plainly and continue. Known cases, both pre-existing and neither a blocker:
+
+- `api-platform` — a full `tsc --noEmit` surfaces roughly 15 errors confined to unrelated `*.spec.ts` files; `tsconfig.build.json` is clean. Verify your own files are error-free and that you added none.
+- `platform` — `bookingFormDateTimeSection.test.ts` already fails one assertion on `develop`. Never block on it and never "fix" it inside a hotfix.
+
+If the failure **is** yours and you cannot resolve it quickly, **stop and report**. Do not push red.
+
+### Husky / lint-staged
+
+The `pre-commit` hook prints a `husky - DEPRECATED` banner — that is a **warning, not a failure**; ignore it. It then runs lint-staged, which auto-fixes and re-stages. If the commit genuinely aborts, read the real error, fix the source, re-stage, and retry. **Do not use `--no-verify`** unless the human explicitly asks — the hook is the team's quality gate.
+
+---
+
+## Step 7 — Bump the version (separate commit, app repos only)
+
+Set the `version` field in the repo's `package.json` to the new version — a targeted edit of that one line, no reformatting. Then commit it **on its own**:
+
+```bash
+git -C <repo> add package.json
+git -C <repo> commit -m "chore(release): <new>"
+```
+
+**Why this must be a separate commit:** step 9 cherry-picks the fix into a branch based on `dev` / `develop`, and those branches are deliberately never version-bumped (`api-platform` `dev` sits on an older version, `platform` `develop` on an unrelated one entirely). Bundling the bump with the fix drags a wrong `package.json` into the working branch. Keeping them apart is what makes the sync a clean, single-purpose cherry-pick.
