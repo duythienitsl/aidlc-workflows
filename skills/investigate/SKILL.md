@@ -7,7 +7,7 @@ description: Diagnoses a production issue from a symptom to a confirmed root cau
 
 ## Overview
 
-Stage 0 of the pipeline: turn a production **symptom** into a confirmed **root cause + affected scope + evidence**. You work *backwards* across LH-v1's ~12 integrated systems, gathering evidence **read-only**, never mutating production. The output is a root-cause analysis (`investigation.md`) that becomes the *Problem Statement* for `write-prd` when a fix needs planning — or a direct, scoped fix when it doesn't. Lean on the embedded playbook (`system-map.md`, `tooling-and-access.md`, `known-issues.md`) so you start from what's already known, not a blank page.
+Stage 0 of the pipeline: turn a production **symptom** into a confirmed **root cause + affected scope + evidence**. You work *backwards* across LH-v1's ~12 integrated systems, gathering evidence **read-only**, never mutating production. The output is a root-cause analysis (`investigation.md` plus a Vietnamese `investigation-vi.md`) that becomes the *Problem Statement* for `write-prd` when a fix needs planning — or a direct, scoped fix when it doesn't. Lean on the embedded playbook (`system-map.md`, `tooling-and-access.md`, `known-issues.md`) so you start from what's already known, not a blank page.
 
 ## When to Use
 
@@ -27,7 +27,11 @@ Stage 0 of the pipeline: turn a production **symptom** into a confirmed **root c
 6. **Gather evidence (READ-ONLY)** — Confirm or refute each hypothesis using MCP tools and code reading per `tooling-and-access.md`. **No write/update/transition/delete call against any external system.** Record every query and its result as an evidence trail (you will paste this into the report). Prefer exact lookups (DB primary keys, DynamoDB partition keys, deal/task IDs) over broad scans.
 7. **Adversarially verify** — Do not stop at the first plausible cause. Corroborate the leading hypothesis with **at least one independent signal** (a second system, a second record, a log timestamp) and actively try to rule out the runner-up. A cause you only confirmed one way is a candidate, not a conclusion.
 8. **Conclude** — State the root cause, the **affected scope** (which records, how many, since when), the evidence trail, and **fix options** with rough effort/risk and *where* the fix belongs (api-platform code, legacy code, a HubSpot workflow, a Make scenario, external config).
-9. **Write the report** — Save `investigation.md` to `docs/<issue-slug>/` (short kebab-case slug, e.g. `duplicate-revisit-delivery-email`) using the **Investigation Template** below. This folder is reused: if the issue proceeds to `write-prd`, the PRD lands in the same `docs/<issue-slug>/`.
+9. **Write the report** — Save the report to `docs/<issue-slug>/` (short kebab-case slug, e.g. `duplicate-revisit-delivery-email`) using the **Investigation Template** below. Write **two files** — always produce both:
+   - **`investigation.md`** — English version (`docs/<issue-slug>/investigation.md`)
+   - **`investigation-vi.md`** — Vietnamese version (`docs/<issue-slug>/investigation-vi.md`)
+
+   Both files use the same template and carry identical content, evidence, and conclusions — section names, headings, and all prose are translated into the respective language. Concrete identifiers (entity IDs, file paths, table/column names, scenario/workflow IDs, code references, query snippets) stay verbatim in both versions; only the surrounding prose is translated. This folder is reused: if the issue proceeds to `write-prd`, the PRD lands in the same `docs/<issue-slug>/`.
 10. **Handoff gate** — Branch on the conclusion and **stop for the human**:
     - **Trivial / fully specified** → propose the direct fix as a single `execute-tasks` slice (or a one-off change), naming the file/workflow/config to change. No PRD needed.
     - **Non-trivial / needs scoping** → recommend `/write-prd` in the same `docs/<issue-slug>/` folder, with this `investigation.md` as the Problem Statement input.
@@ -85,7 +89,8 @@ Trivial fix | needs write-prd | external-only. The exact next step.
 
 ## Verification
 
-- [ ] `investigation.md` exists at `docs/<issue-slug>/` and follows the template (symptom, evidence trail, root cause, affected scope, fix options, handoff).
+- [ ] Both report files exist at `docs/<issue-slug>/` and follow the template (symptom, evidence trail, root cause, affected scope, fix options, handoff): `investigation.md` (English) and `investigation-vi.md` (Vietnamese).
+- [ ] Both files carry the same content — no section, evidence item, or conclusion is missing from either version; concrete identifiers (IDs, paths, query snippets) are verbatim in both.
 - [ ] Root cause is corroborated by at least one independent signal — not a single plausible read.
 - [ ] No mutating call was made against any production system during the investigation.
 - [ ] The handoff branch (trivial / write-prd / external-only) is stated with the concrete next step.
