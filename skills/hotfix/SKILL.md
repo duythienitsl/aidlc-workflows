@@ -293,3 +293,52 @@ The MR description carries the same five items as step 8, plus:
 **Never run `terraform apply` from this skill.** The CI gate exists precisely so a human presses that button.
 
 **End state for infrastructure: exactly one MR** — `hotfix/LHP-XXXX → main`, unmerged.
+
+---
+
+## Step 10 — Report
+
+### Several repos at once
+
+When the human selected more than one repo, run steps 2-9 for each **in turn and independently**. Each repo resolves its **own** version from its own `origin/main` — the two app repos can legitimately sit on different versions, and forcing them to match is not this skill's job.
+
+Finish each repo before starting the next, so a failure in one leaves a clean, reportable state rather than three half-built branches.
+
+### Report shape
+
+| Repo | Version | Hotfix branch | MR #1 (→ main) | Sync branch | MR #2 (→ dev/develop) |
+|------|---------|---------------|----------------|-------------|------------------------|
+| api-platform | 1.94.6 | `release/1.94.6` | `<url>` | `sync/release.1.94.6` | `<url>` |
+| platform | … | … | … | … | … |
+| infrastructure | n/a | `hotfix/LHP-XXXX` | `<url>` | n/a | n/a |
+
+Alongside the table, state:
+
+- **Blast radius and rollback**, repeated from the MR descriptions so the human does not have to open the MRs to see them.
+- **Merge ordering** when several repos changed. Backend merges and deploys **before** frontend whenever the frontend calls a new endpoint, field, or template. If there is no dependency, say so explicitly rather than leaving it implied.
+- **Anything left red, skipped, or outstanding** — a pre-existing test failure you decided not to own, a cherry-pick conflict that blocked MR #2, a skipped sync because the fix was already on `dev`. State it plainly; do not bury it.
+- **That nothing was merged.** Every MR is open and waiting for review.
+
+---
+
+## Verification
+
+- [ ] The target repo came from the argument or from an explicit question — never a guess.
+- [ ] The hotfix branch was cut from `origin/main`, and the version was reconciled across both sources.
+- [ ] The fix commit and the `chore(release)` bump are separate commits, and the fix SHAs were recorded.
+- [ ] All gates ran; anything red was proven pre-existing before being waved through.
+- [ ] The sync branch carries the fix and **not** the bump.
+- [ ] Every MR description has what changed, why it could not wait, blast radius, rollback, and a link to its sibling.
+- [ ] Two MRs per app repo, one for infrastructure. None merged.
+
+## Red flags
+
+- Picking the repo yourself because "it was obviously the backend".
+- Cutting from local `main`, or from `dev`/`develop`, instead of `origin/main`.
+- Auto-picking a version when the two sources disagree.
+- One commit containing both the fix and the version bump.
+- Merging the hotfix branch into the sync branch instead of cherry-picking.
+- Resolving a cherry-pick conflict on your own judgement.
+- Pushing with a gate you broke still red, or skipping the production build "because it is only a one-line fix".
+- An MR description with no rollback path.
+- Merging any MR.
