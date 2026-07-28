@@ -186,3 +186,34 @@ git -C <repo> commit -m "chore(release): <new>"
 ```
 
 **Why this must be a separate commit:** step 9 cherry-picks the fix into a branch based on `dev` / `develop`, and those branches are deliberately never version-bumped (`api-platform` `dev` sits on an older version, `platform` `develop` on an unrelated one entirely). Bundling the bump with the fix drags a wrong `package.json` into the working branch. Keeping them apart is what makes the sync a clean, single-purpose cherry-pick.
+
+---
+
+## Step 8 — Push and open MR #1 (into `main`)
+
+Push the hotfix branch and create the MR in one shot via GitLab push options:
+
+```bash
+git -C <repo> push -u origin release/<new> \
+  -o merge_request.create \
+  -o merge_request.target=main \
+  -o merge_request.title="hotfix(<new>): <short summary>" \
+  -o merge_request.description="<see required content below>" \
+  -o merge_request.remove_source_branch=false
+```
+
+- If the branch **already exists** on the remote, drop `-o merge_request.create` and just `git -C <repo> push origin release/<new>` — GitLab keeps the open MR. If no MR exists yet for that branch, re-run with the option.
+- A `pre-push` hook may run further checks. If it blocks the push, apply the same handling as step 6, then push again.
+- GitLab prints the MR URL in the push output. **Capture it** for the report.
+
+### Required MR description content
+
+Every hotfix MR description must carry all five:
+
+1. **What changed** — one or two sentences, plus the ticket.
+2. **Why it could not wait** — the production symptom.
+3. **Blast radius** — which flows, endpoints, screens, or jobs this code path touches, and who is affected if it is wrong.
+4. **Rollback** — how to undo it: revert this MR and redeploy, or redeploy the previous version. Name the previous version explicitly. If the fix involves a DB migration, say so here and state the migration ordering — this skill does not manage migrations.
+5. **Link to the sibling MR** — the sync MR from step 9. Open MR #1 first, then edit in the link, or state that MR #2 follows.
+
+**Do not merge the MR.** Leave it open for review.
